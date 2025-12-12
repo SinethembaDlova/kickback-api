@@ -33,3 +33,12 @@ export interface IUser extends Document {
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
+
+const AddressSchema = new Schema<IAddress>({
+  street: { type: String },
+  suburb: { type: String },
+  city: { type: String },
+  province: { type: String },
+  postalCode: { type: String }
+}, { _id: false });
+
