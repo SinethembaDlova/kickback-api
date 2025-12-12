@@ -125,3 +125,7 @@ UserSchema.methods.comparePassword = async function(candidatePassword: string): 
     return false;
   }
 };
+
+// Create indexes
+UserSchema.index({ email: 1 });
+UserSchema.index({ role: 1 });
