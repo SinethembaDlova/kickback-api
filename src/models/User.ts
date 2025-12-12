@@ -42,3 +42,11 @@ const AddressSchema = new Schema<IAddress>({
   postalCode: { type: String }
 }, { _id: false });
 
+const PreferredPickupLocationSchema = new Schema<IPreferredPickupLocation>({
+  usePrimaryAddress: { type: Boolean, default: true },
+  street: { type: String },
+  suburb: { type: String },
+  city: { type: String },
+  province: { type: String },
+  postalCode: { type: String }
+}, { _id: false });
