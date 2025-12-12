@@ -4,7 +4,7 @@
   "description": "Backend API for KickBack Sneaker Cleaning Service built with Node.js, TypeScript, Express, MongoDB, and Mongoose.",
   "license": "ISC",
   "author": "Sinethemba Dlova",
-  "type": "module",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/server.ts",
