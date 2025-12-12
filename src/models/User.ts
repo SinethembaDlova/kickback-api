@@ -7,4 +7,12 @@ export interface IAddress {
   city?: string;
   province?: string;
   postalCode?: string;
-}-
+}
+export interface IPreferredPickupLocation {
+  usePrimaryAddress: boolean;
+  street?: string;
+  suburb?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+}
