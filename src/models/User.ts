@@ -50,3 +50,61 @@ const PreferredPickupLocationSchema = new Schema<IPreferredPickupLocation>({
   province: { type: String },
   postalCode: { type: String }
 }, { _id: false });
+
+const UserSchema = new Schema<IUser>({
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email']
+  },
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+    minlength: [8, 'Password must be at least 8 characters'],
+    select: false // Don't include password by default in queries
+  },
+  firstName: {
+    type: String,
+    required: [true, 'First name is required'],
+    trim: true
+  },
+  lastName: {
+    type: String,
+    required: [true, 'Last name is required'],
+    trim: true
+  },
+  phone: {
+    type: String,
+    required: [true, 'Phone number is required'],
+    trim: true
+  },
+  role: {
+    type: String,
+    enum: ['customer', 'admin', 'technician'],
+    default: 'customer'
+  },
+  address: {
+    type: AddressSchema,
+    default: {}
+  },
+  preferredPickupLocation: {
+    type: PreferredPickupLocationSchema,
+    default: { usePrimaryAddress: true }
+  },
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  lastLogin: {
+    type: Date
+  }
+}, {
+  timestamps: true
+});
