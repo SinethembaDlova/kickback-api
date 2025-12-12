@@ -1,0 +1,12 @@
+{
+  "name": "kickback-api",
+  "version": "1.0.0",
+  "description": "Backend API for KickBack Sneaker Cleaning Service built with Node.js, TypeScript, Express, MongoDB, and Mongoose.",
+  "license": "ISC",
+  "author": "Sinethemba Dlova",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  }
+}
