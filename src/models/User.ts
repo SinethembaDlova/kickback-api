@@ -108,3 +108,11 @@ const UserSchema = new Schema<IUser>({
 }, {
   timestamps: true
 });
+
+//Hash password before saving
+UserSchema.pre<IUser>('save', async function (this: IUser) {
+  if (!this.isModified('password')) return;
+
+  const salt = await bcrypt.genSalt(12);
+  this.password = await bcrypt.hash(this.password, salt);
+});
