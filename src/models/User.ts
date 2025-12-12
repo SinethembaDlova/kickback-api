@@ -16,3 +16,20 @@ export interface IPreferredPickupLocation {
   province?: string;
   postalCode?: string;
 }
+
+export interface IUser extends Document {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  role: 'customer' | 'admin' | 'technician';
+  address?: IAddress;
+  preferredPickupLocation?: IPreferredPickupLocation;
+  emailVerified: boolean;
+  isActive: boolean;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
+}
