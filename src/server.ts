@@ -2,6 +2,8 @@ import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import authRoutes from './routes/auth';
+
 
 // Load environment variables
 dotenv.config();
@@ -28,6 +30,8 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // API Routes
+app.use('/api/auth', authRoutes);
+
 
 // 404 handler
 app.use((req: Request, res: Response) => {
