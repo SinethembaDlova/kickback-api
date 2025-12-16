@@ -78,3 +78,33 @@ export const getOrders = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Failed to get orders' });
   }
 };
+
+export const getOrderById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    const { orderId } = req.params;
+
+    const order = await Order.findById(orderId)
+      .populate('userId', 'firstName lastName email phone');
+
+    if (!order) {
+      res.status(404).json({ message: 'Order not found' });
+      return;
+    }
+
+    // Check authorization - customers can only view their own orders
+    if (req.user.role === 'customer' && order.userId._id.toString() !== req.user._id.toString()) {
+      res.status(403).json({ message: 'Access denied' });
+      return;
+    }
+
+    res.status(200).json(order);
+  } catch (error: any) {
+    console.error('Get order error:', error);
+    res.status(500).json({ message: 'Failed to get order' });
+  }
+};
