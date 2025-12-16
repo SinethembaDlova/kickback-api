@@ -126,3 +126,44 @@ export const signIn = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Failed to sign in' });
   }
 };
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      res.status(400).json({ message: 'Email is required' });
+      return;
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      // Don't reveal if email exists for security
+      res.status(200).json({ message: 'If that email exists, a verification code has been sent' });
+      return;
+    }
+
+    // Generate 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Delete any existing codes for this email
+    await PasswordReset.deleteMany({ email: email.toLowerCase() });
+
+    // Create new password reset code
+    await PasswordReset.create({
+      email: email.toLowerCase(),
+      code
+    });
+
+    // Send email
+    await sendPasswordResetEmail(email, code);
+
+    res.status(200).json({ 
+      message: 'Verification code sent to your email' 
+    });
+  } catch (error: any) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Failed to process request' });
+  }
+};
