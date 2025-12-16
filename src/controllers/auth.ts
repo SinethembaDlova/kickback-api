@@ -167,3 +167,38 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: 'Failed to process request' });
   }
 };
+
+export const verifyCode = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      res.status(400).json({ message: 'Email and code are required' });
+      return;
+    }
+
+    // Find valid, unused code
+    const resetRequest = await PasswordReset.findOne({
+      email: email.toLowerCase(),
+      code,
+      used: false,
+      expiresAt: { $gt: new Date() }
+    });
+
+    if (!resetRequest) {
+      res.status(400).json({ 
+        message: 'Invalid or expired code',
+        valid: false 
+      });
+      return;
+    }
+
+    res.status(200).json({ 
+      message: 'Code verified successfully',
+      valid: true 
+    });
+  } catch (error: any) {
+    console.error('Verify code error:', error);
+    res.status(500).json({ message: 'Failed to verify code' });
+  }
+};
