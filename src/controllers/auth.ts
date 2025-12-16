@@ -266,3 +266,24 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Failed to get user profile' });
   }
 };
+
+export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    // Generate new token
+    const token = generateToken({
+      userId: req.user._id.toString(),
+      email: req.user.email,
+      role: req.user.role
+    });
+
+    res.status(200).json({ token });
+  } catch (error: any) {
+    console.error('Refresh token error:', error);
+    res.status(500).json({ message: 'Failed to refresh token' });
+  }
+};
