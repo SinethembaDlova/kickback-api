@@ -10,3 +10,37 @@ declare module 'express-serve-static-core' {
     tokenPayload?: ITokenPayload;
   }
 }
+
+export const authenticate = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({ message: 'No token provided' });
+      return;
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    // Verify token
+    const payload = verifyToken(token);
+    req.tokenPayload = payload;
+
+    // Get user from database
+    const user = await User.findById(payload.userId);
+
+    if (!user || !user.isActive) {
+      res.status(401).json({ message: 'User not found or inactive' });
+      return;
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
