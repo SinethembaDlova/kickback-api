@@ -176,3 +176,44 @@ export const uploadAfterPhotos = async (req: Request, res: Response): Promise<vo
     res.status(500).json({ message: 'Failed to upload after photos' });
   }
 };
+
+export const updateOrderPayment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    const { orderId } = req.params;
+    const { transactionId, status, method } = req.body;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      res.status(404).json({ message: 'Order not found' });
+      return;
+    }
+
+    // Check authorization - customers can only update their own orders
+    if (req.user.role === 'customer' && order.userId.toString() !== req.user._id.toString()) {
+      res.status(403).json({ message: 'Access denied' });
+      return;
+    }
+
+    // Update payment details
+    order.payment.status = status || order.payment.status;
+    order.payment.transactionId = transactionId || order.payment.transactionId;
+    order.payment.method = method || order.payment.method;
+
+    if (status === 'completed') {
+      order.payment.paidAt = new Date();
+    }
+
+    await order.save();
+
+    res.status(200).json(order);
+  } catch (error: any) {
+    console.error('Update payment error:', error);
+    res.status(500).json({ message: 'Failed to update payment' });
+  }
+};
