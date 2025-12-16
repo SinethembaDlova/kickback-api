@@ -202,3 +202,53 @@ export const verifyCode = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({ message: 'Failed to verify code' });
   }
 };
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    if (!email || !code || !newPassword) {
+      res.status(400).json({ message: 'Email, code, and new password are required' });
+      return;
+    }
+
+    // Validate password strength
+    if (newPassword.length < 8) {
+      res.status(400).json({ message: 'Password must be at least 8 characters' });
+      return;
+    }
+
+    // Find valid, unused code
+    const resetRequest = await PasswordReset.findOne({
+      email: email.toLowerCase(),
+      code,
+      used: false,
+      expiresAt: { $gt: new Date() }
+    });
+
+    if (!resetRequest) {
+      res.status(400).json({ message: 'Invalid or expired code' });
+      return;
+    }
+
+    // Find user
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    // Mark code as used
+    resetRequest.used = true;
+    await resetRequest.save();
+
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error: any) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Failed to reset password' });
+  }
+};
