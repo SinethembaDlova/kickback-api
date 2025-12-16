@@ -52,3 +52,29 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({ message: 'Failed to create order' });
   }
 };
+
+export const getOrders = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    let query: any = {};
+
+    // If customer, only show their orders
+    // If admin or technician, show all orders
+    if (req.user.role === 'customer') {
+      query.userId = req.user._id;
+    }
+
+    const orders = await Order.find(query)
+      .populate('userId', 'firstName lastName email phone')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ orders });
+  } catch (error: any) {
+    console.error('Get orders error:', error);
+    res.status(500).json({ message: 'Failed to get orders' });
+  }
+};
