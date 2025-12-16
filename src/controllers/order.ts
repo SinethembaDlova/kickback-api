@@ -143,3 +143,36 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
     res.status(500).json({ message: 'Failed to update order status' });
   }
 };
+
+export const uploadAfterPhotos = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    const { orderId } = req.params;
+    const { afterPhotos } = req.body;
+
+    if (!afterPhotos || !Array.isArray(afterPhotos)) {
+      res.status(400).json({ message: 'After photos are required' });
+      return;
+    }
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      res.status(404).json({ message: 'Order not found' });
+      return;
+    }
+
+    // Update after photos
+    order.afterPhotos = afterPhotos;
+    await order.save();
+
+    res.status(200).json(order);
+  } catch (error: any) {
+    console.error('Upload after photos error:', error);
+    res.status(500).json({ message: 'Failed to upload after photos' });
+  }
+};
