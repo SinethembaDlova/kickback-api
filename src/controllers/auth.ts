@@ -73,3 +73,56 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Failed to create account' });
   }
 };
+
+export const signIn = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate required fields
+    if (!email || !password) {
+      res.status(400).json({ message: 'Email and password are required' });
+      return;
+    }
+
+    // Find user and include password field
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    
+    if (!user) {
+      res.status(401).json({ message: 'Invalid email or password' });
+      return;
+    }
+
+    // Check if user is active
+    if (!user.isActive) {
+      res.status(401).json({ message: 'Account is inactive. Please contact support.' });
+      return;
+    }
+
+    // Compare password
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      res.status(401).json({ message: 'Invalid email or password' });
+      return;
+    }
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Generate JWT token
+    const token = generateToken({
+      userId: user._id.toString(),
+      email: user.email,
+      role: user.role
+    });
+
+    res.status(200).json({
+      user: formatUserResponse(user),
+      token,
+      message: 'Sign in successful'
+    });
+  } catch (error: any) {
+    console.error('Signin error:', error);
+    res.status(500).json({ message: 'Failed to sign in' });
+  }
+};
