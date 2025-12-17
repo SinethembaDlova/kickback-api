@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
+import orderRoutes from './routes/order';
 
 
 // Load environment variables
@@ -31,7 +32,7 @@ app.get('/health', (req: Request, res: Response) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
-
+app.use('/api/orders', orderRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
