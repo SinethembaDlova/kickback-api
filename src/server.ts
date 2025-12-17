@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import orderRoutes from './routes/order';
-
+import webhookRoutes from './routes/webhooks';
 
 // Load environment variables
 dotenv.config();
@@ -33,6 +33,7 @@ app.get('/health', (req: Request, res: Response) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/webhooks', webhookRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
