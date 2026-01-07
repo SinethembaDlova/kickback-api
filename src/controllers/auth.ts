@@ -58,6 +58,10 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       role: user.role
     });
 
+    console.log('token: ',token);
+    console.log('user ', formatUserResponse(user));
+
+
     // Send welcome email (don't await - shouldn't block response)
     sendWelcomeEmail(user.email, user.firstName).catch(err => 
       console.error('Welcome email failed:', err)
