@@ -1,19 +1,39 @@
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
+// Check if email is configured
+const isEmailConfigured = () => {
+  return !!(process.env.SMTP_USER && process.env.SMTP_PASS);
+};
+
+// Create transporter only if credentials are available
+const createTransporter = () => {
+  if (!isEmailConfigured()) {
+    console.warn('Email service not configured - SMTP credentials missing');
+    return null;
   }
-});
+
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    }
+  });
+};
+
+const transporter = createTransporter();
 
 export const sendPasswordResetEmail = async (
   email: string,
   code: string
 ): Promise<void> => {
+  if (!transporter) {
+    console.log('Email not configured - skipping password reset email');
+    return;
+  }
+
   try {
     await transporter.sendMail({
       from: `"KickBack" <${process.env.SMTP_USER}>`,
@@ -55,9 +75,10 @@ export const sendPasswordResetEmail = async (
         </html>
       `
     });
+    console.log(`Password reset email sent to ${email}`);
   } catch (error) {
-    console.error('Error sending email:', error);
-    throw new Error('Failed to send email');
+    console.error('Error sending password reset email:', error);
+    throw new Error('Failed to send password reset email');
   }
 };
 
@@ -65,6 +86,11 @@ export const sendWelcomeEmail = async (
   email: string,
   firstName: string
 ): Promise<void> => {
+  if (!transporter) {
+    console.log('Email not configured - skipping welcome email');
+    return;
+  }
+
   try {
     await transporter.sendMail({
       from: `"KickBack" <${process.env.SMTP_USER}>`,
@@ -111,6 +137,7 @@ export const sendWelcomeEmail = async (
         </html>
       `
     });
+    console.log(`Welcome email sent to ${email}`);
   } catch (error) {
     console.error('Error sending welcome email:', error);
     // Don't throw - welcome email failure shouldn't block signup
